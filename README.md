@@ -162,4 +162,4 @@ This project is for educational purposes as part of a software engineering assig
 
 ## Author
 
-Created by Jiayao Hu
+Created by Jiayao Hu and Hantao Wu 
