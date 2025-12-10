@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Contact Manager</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        
+        .sidebar-active {
+            @apply bg-blue-50 text-blue-600 border-l-4 border-blue-500;
+        }
+        
+        .contact-card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .btn-primary {
+            @apply bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out;
+        }
+        
+        .btn-outline {
+            @apply border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out;
+        }
+        
+        .btn-danger {
+            @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out;
+        }
+        
+        /* 修复输入框颜色问题 */
+        .form-input {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white transition-all duration-200 ease-in-out;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+        
+        .form-input:hover {
+border-color: #9ca3af;
+        }
+        
+        /* 增强输入框可视化效果 */
+        .form-input-enhanced {
+            @apply w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-100 focus:border-blue-400 bg-white transition-all duration-300 ease-in-out;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-input-enhanced:focus {
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .form-input-enhanced:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* 选择框样式增强 */
+        select.form-input-enhanced {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        /* 文本域样式增强 */
+        textarea.form-input-enhanced {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* 复选框样式增强 */
+        .checkbox-enhanced {
+            @apply h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 transition-all duration-200;
+        }
+        
+        .checkbox-enhanced:checked {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 添加缩放动画 */
+        @keyframes scaleIn {
+from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .animate-scale-in {
+            animation: scaleIn 0.2s ease-out;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .toast-notification {
+            z-index: 1000;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
+        
+        /* 星标按钮过渡效果 */
+        .star-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        
+        /* 确保头像始终为圆形 */
+        .avatar-circle {
+            border-radius: 50%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center">
+                    <i class="fas fa-address-book text-blue-500 text-2xl mr-3"></i>
+                    <h1 class="text-xl font-bold text-gray-900">Contact Manager</h1>
+                </div>
+                
+                <div class="relative flex-1 max-w-2xl">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-search text-gray-400"></i>
+                    </div>
+                    <input type="text" id="search-input" placeholder="Search contacts..." class="form-input pl-10 w-full">
+                </div>
+                
+                <!-- 在header部分添加导出按钮 -->
+                <div class="flex items-center space-x-3">
+                    <button id="view-toggle" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
+                        <i class="fa fa-th-large"></i>
+                    </button>
+                    <button id="export-excel-btn" class="p-2 rounded-lg hover:bg-green-100 text-green-600 transition-colors" title="Export to Excel">
+                        <i class="fas fa-file-excel"></i>
+                    </button>
+                    <button id="add-contact-btn" class="btn-primary flex items-center">
+                        <i class="fas fa-plus mr-2"></i> Add Contact
+                    </button>
+                </div>
+                
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 container mx-auto px-4 py-6">
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Sidebar -->
+            <aside class="w-full lg:w-64 flex-shrink-0">
+                <div class="bg-white rounded-xl shadow-sm p-4 sticky top-6">
+                    <nav>
+                        <ul class="space-y-1">
+                            <li>
+                                <a href="#" id="menu-all-contacts" class="sidebar-active flex items-center px-4 py-3 rounded-lg transition-colors duration-200">
+                                    <i class="fas fa-address-book w-6 text-center text-blue-500"></i>
+                                    <span class="ml-3 font-medium">All Contacts</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu-starred" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-star w-6 text-center text-gray-400"></i>
+                                    <span class="ml-3">Starred</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" id="menu-groups" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                                    <i class="fas fa-object-group w-6 text-center text-green-500"></i>
+                                    <span class="ml-3">Groups</span>
+                                </a>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-6">
+                            <div class="flex items-center justify-between px-4 py-2">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Groups</h3>
+                                <button class="text-blue-500 hover:text-blue-700 transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            <ul id="groups-list" class="mt-2 space-y-1">
+                                <!-- Groups will be populated here -->
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="flex-1">
+                <div id="contacts-view">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">All Contacts</h2>
+                        <div class="flex items-center space-x-3">
+                            <select id="sort-select" class="form-input py-2 text-sm">
+                                <option value="name">Sort by Name</option>
+                                <option value="category">Sort by Category</option>
+                                <option value="starred">Starred First</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Skeleton -->
+                    <div id="loading-skeleton" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-xl shadow-sm p-5 animate-pulse">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gray-200"></div>
+                                <div class="ml-4 flex-1">
+                                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="h-3 bg-gray-200 rounded"></div>
+                                <div class="h-3 bg-gray-200 rounded w-5/6"></div>
+                            </div>
+                        </div>
+                        <!-- Repeat for more skeleton items -->
+                    </div>
+                    
+                    <!-- Contacts Grid View -->
+                    <div id="contacts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Contacts will be populated here -->
+                    </div>
+                    
+                    <!-- Contacts List View -->
+                    <div id="contacts-list" class="hidden bg-white rounded-xl shadow-sm overflow-hidden">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contacts-table-body" class="bg-white divide-y divide-gray-200">
+                                <!-- Contacts will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+<div id="groups-view" class="hidden">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Groups</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="groups-content"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            &copy; 2023 Contact Manager | All rights reserved
+        </div>
+    </footer>
+
+    <!-- Add/Edit Contact Modal -->
+    <div id="contact-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-scale-in" id="modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-900" id="modal-title">Add New Contact</h2>
+            </div>
+            <form id="contact-form" class="p-6 space-y-6">
+                <input type="hidden" id="contact-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label for="first-name" class="block text-sm font-medium text-gray-700 font-semibold">First Name</label>
+                        <input type="text" id="first-name" name="firstName" class="form-input-enhanced" placeholder="Enter first name" required>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <label for="last-name" class="block text-sm font-medium text-gray-700 font-semibold">Last Name</label>
+                        <input type="text" id="last-name" name="lastName" class="form-input-enhanced" placeholder="Enter last name" required>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-3">
+                        <label for="contact-category" class="block text-sm font-medium text-gray-700 font-semibold">Category</label>
+                        <select id="contact-category" name="category" class="form-input-enhanced bg-white">
+                            <option value="">Select Category</option>
+                            <option value="Family">Family</option>
+                            <option value="Friends">Friends</option>
+                            <option value="Work">Work</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <label for="contact-institution" class="block text-sm font-medium text-gray-700 font-semibold">Institution</label>
+                        <input type="text" id="contact-institution" name="institution" class="form-input-enhanced" placeholder="Enter institution">
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <label for="contact-phone" class="block text-sm font-medium text-gray-700 font-semibold">Phone Number</label>
+                    <input type="tel" id="contact-phone" name="phoneNumber" class="form-input-enhanced" placeholder="Enter phone number" required>
+                </div>
+                
+                <div class="space-y-3">
+                    <label for="contact-email" class="block text-sm font-medium text-gray-700 font-semibold">Email</label>
+                    <input type="email" id="contact-email" name="email" class="form-input-enhanced" placeholder="Enter email address">
+                </div>
+                
+                <div class="space-y-3">
+                    <label for="contact-address" class="block text-sm font-medium text-gray-700 font-semibold">Address</label>
+                    <textarea id="contact-address" name="address" rows="3" class="form-input-enhanced" placeholder="Enter address"></textarea>
+                </div>
+                
+                <div class="flex items-center p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <input type="checkbox" id="contact-starred" name="isStarred" class="checkbox-enhanced">
+                    <label for="contact-starred" class="ml-3 block text-sm font-medium text-gray-700">Mark as starred</label>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+                    <button type="button" id="close-modal-btn" class="btn-outline px-6 py-3">Cancel</button>
+                    <button type="submit" class="btn-primary px-6 py-3">Save Contact</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-scale-in">
+            <div class="text-center mb-4">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-500 mb-4">
+                    <i class="fas fa-exclamation-triangle text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900">Confirm Delete</h3>
+                <p class="text-gray-600 mt-2">Are you sure you want to delete this contact? This action cannot be undone.</p>
+            </div>
+            <div class="flex justify-center space-x-3 pt-4">
+                <button type="button" id="cancel-delete-btn" class="btn-outline">Cancel</button>
+                <button type="button" id="confirm-delete-btn" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-notification fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg transform transition-all duration-300 translate-y-0 opacity-100 hidden">
+        Notification message
+    </div>
+
+    <script>
+        // API Base URL
+        const API_BASE_URL = '';
+        
+        // State variables
+        let contacts = [];
+        let groups = [];
+        let currentView = 'contacts';
+        let currentContactId = null;
+        let viewMode = 'grid'; // 'grid' or 'list'
+        let sortBy = 'name';
+        
+        // DOM Elements
+        const contactsGrid = document.getElementById('contacts-grid');
+        const contactsList = document.getElementById('contacts-list');
+        const contactsTableBody = document.getElementById('contacts-table-body');
+        const groupsContent = document.getElementById('groups-content');
+        const contactsView = document.getElementById('contacts-view');
+        const groupsView = document.getElementById('groups-view');
+        const contactModal = document.getElementById('contact-modal');
+        const deleteModal = document.getElementById('delete-modal');
+        const contactForm = document.getElementById('contact-form');
+        const modalTitle = document.getElementById('modal-title');
+        const addContactBtn = document.getElementById('add-contact-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+        const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+        const viewToggle = document.getElementById('view-toggle');
+        const searchInput = document.getElementById('search-input');
+        const sortSelect = document.getElementById('sort-select');
+        const menuAllContacts = document.getElementById('menu-all-contacts');
+        const menuStarred = document.getElementById('menu-starred');
+        const menuGroups = document.getElementById('menu-groups');
+        const groupsList = document.getElementById('groups-list');
+        <!-- 在JavaScript DOM元素引用部分添加导出按钮引用 -->
+        const toast = document.getElementById('toast');
+        const exportExcelBtn = document.getElementById('export-excel-btn');
+        
+        // Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+            loadContactsFromAPI();
+            bindEvents();
+        });
+function bindEvents() {
+            // Navigation
+            menuAllContacts.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentView = 'contacts';
+                updateMenuActive();
+                renderContacts();
+            });
+            
+            menuStarred.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentView = 'starred';
+                updateMenuActive();
+                renderStarredContacts();
+            });
+            
+            menuGroups.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentView = 'groups';
+                updateMenuActive();
+                renderGroupsContent();
+            });
+            
+            <!-- 在bindEvents函数中添加导出按钮事件监听器 -->
+            // Buttons
+            addContactBtn.addEventListener('click', openAddContactModal);
+            exportExcelBtn.addEventListener('click', exportToExcel);
+            closeModalBtn.addEventListener('click', closeContactModal);
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            confirmDeleteBtn.addEventListener('click', deleteContact);
+            contactForm.addEventListener('submit', handleFormSubmit);
+            viewToggle.addEventListener('click', toggleViewMode);
+            
+            // Search and sort
+            searchInput.addEventListener('input', handleSearch);
+            sortSelect.addEventListener('change', (e) => {
+                sortBy = e.target.value;
+                renderContacts();
+            });
+            
+            // Modals
+            contactModal.addEventListener('click', (e) => {
+                if (e.target === contactModal) closeContactModal();
+            });
+            
+            deleteModal.addEventListener('click', (e) => {
+                if (e.target === deleteModal) closeDeleteModal();
+            });
+        }
+        
+        function updateMenuActive() {
+            // Remove active class from all menu items
+            menuAllContacts.classList.remove('sidebar-active');
+            menuStarred.classList.remove('sidebar-active');
+            menuGroups.classList.remove('sidebar-active');
+            
+            // Add active class to current menu item
+            if (currentView === 'contacts') {
+                menuAllContacts.classList.add('sidebar-active');
+            } else if (currentView === 'starred') {
+                menuStarred.classList.add('sidebar-active');
+            } else if (currentView === 'groups') {
+                menuGroups.classList.add('sidebar-active');
+            }
+        }
+        
+        // API Functions
+        async function loadContactsFromAPI() {
+            try {
+                showLoading();
+                const response = await fetch(`${API_BASE_URL}/contacts`);
+                if (!response.ok) throw new Error('Failed to fetch contacts');
+                contacts = await response.json();
+                extractGroups();
+                renderContacts();
+                renderGroups();
+            } catch (error) {
+                console.error('Error loading contacts:', error);
+                showToast('Failed to load contacts');
+                contacts = [];
+                groups = [];
+                renderContacts();
+                renderGroups();
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        async function searchContactsAPI(query) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/search?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error('Failed to search contacts');
+                return await response.json();
+            } catch (error) {
+                console.error('Error searching contacts:', error);
+                return [];
+            }
+        }
+        
+        async function createContactAPI(contactData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(contactData)
+                });
+                if (!response.ok) throw new Error('Failed to create contact');
+                return await response.json();
+            } catch (error) {
+                console.error('Error creating contact:', error);
+                throw error;
+            }
+        }
+        
+        async function updateContactAPI(firstName, lastName, contactData) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(contactData)
+                });
+                if (!response.ok) throw new Error('Failed to update contact');
+                return await response.json();
+            } catch (error) {
+                console.error('Error updating contact:', error);
+                throw error;
+            }
+        }
+        
+        async function deleteContactAPI(firstName, lastName) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to delete contact');
+                return await response.json();
+            } catch (error) {
+                console.error('Error deleting contact:', error);
+                throw error;
+            }
+        }
+        
+        <!-- 在toggleStarAPI函数之后添加导出功能函数 -->
+        async function toggleStarAPI(firstName, lastName) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}/star`, {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Failed to toggle star');
+                return await response.json();
+            } catch (error) {
+                console.error('Error toggling star:', error);
+                throw error;
+            }
+        }
+        
+        function exportToExcel() {
+            try {
+                // Show notification
+                showToast('正在导出联系人到Excel文件...', 'info');
+                
+                // Directly navigate to export API endpoint
+                window.open(`${API_BASE_URL}/contacts/export`, '_blank');
+            } catch (error) {
+                console.error('导出失败:', error);
+                showToast('导出失败，请稍后再试。', 'error');
+            }
+        }
+        
+        // UI Functions
+        function showLoading() {
+            document.getElementById('loading-skeleton').classList.remove('hidden');
+            contactsGrid.classList.add('hidden');
+            contactsList.classList.add('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-skeleton').classList.add('hidden');
+        }
+        
+        function extractGroups() {
+            const categories = [...new Set(contacts.map(c => c.category || 'Uncategorized'))];
+            groups = categories.filter(g => g !== '');
+        }
+        
+        function renderContacts(filteredContacts = null) {
+            contactsView.classList.remove('hidden');
+            groupsView.classList.add('hidden');
+            
+            let contactsToShow = filteredContacts || contacts;
+            
+            // Apply sorting
+            contactsToShow = sortContacts(contactsToShow);
+            
+            // Clear containers
+            contactsGrid.innerHTML = '';
+            contactsTableBody.innerHTML = '';
+            
+            if (contactsToShow.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'col-span-full flex flex-col items-center justify-center py-12 text-gray-500';
+                emptyState.innerHTML = `
+                    <i class="fas fa-address-book text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium mb-2">No contacts found</h3>
+                    <p class="text-center max-w-md">Try changing your search or add a new contact.</p>
+                `;
+                contactsGrid.appendChild(emptyState);
+                return;
+            }
+            
+            contactsToShow.forEach(contact => {
+                contactsGrid.appendChild(createContactCard(contact));
+                contactsTableBody.appendChild(createContactRow(contact));
+            });
+            
+            // Toggle view mode
+            if (viewMode === 'grid') {
+                contactsGrid.classList.remove('hidden');
+                contactsList.classList.add('hidden');
+                viewToggle.innerHTML = '<i class="fas fa-list"></i>';
+            } else {
+                contactsGrid.classList.add('hidden');
+                contactsList.classList.remove('hidden');
+                viewToggle.innerHTML = '<i class="fas fa-th-large"></i>';
+            }
+        }
+        
+        function renderStarredContacts() {
+            contactsView.classList.remove('hidden');
+            groupsView.classList.add('hidden');
+            
+            let starredContacts = contacts.filter(contact => contact.is_starred);
+            
+            // Apply sorting
+            starredContacts = sortContacts(starredContacts);
+            
+            // Clear containers
+            contactsGrid.innerHTML = '';
+            contactsTableBody.innerHTML = '';
+            
+            if (starredContacts.length === 0) {
+                const emptyState = document.createElement('div');
+                emptyState.className = 'col-span-full flex flex-col items-center justify-center py-12 text-gray-500';
+                emptyState.innerHTML = `
+                    <i class="fas fa-star text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium mb-2">No starred contacts</h3>
+                    <p class="text-center max-w-md">Star your favorite contacts to see them here.</p>
+                `;
+                contactsGrid.appendChild(emptyState);
+                return;
+            }
+            
+            starredContacts.forEach(contact => {
+                contactsGrid.appendChild(createContactCard(contact));
+                contactsTableBody.appendChild(createContactRow(contact));
+            });
+            
+            // Toggle view mode
+            if (viewMode === 'grid') {
+                contactsGrid.classList.remove('hidden');
+                contactsList.classList.add('hidden');
+                viewToggle.innerHTML = '<i class="fas fa-list"></i>';
+            } else {
+                contactsGrid.classList.add('hidden');
+                contactsList.classList.remove('hidden');
+                viewToggle.innerHTML = '<i class="fas fa-th-large"></i>';
+            }
+        }
+        
+        function createContactCard(contact) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-sm p-5 contact-card-hover transition-all duration-200 animate-scale-in';
+            
+            const fullName = `${contact.first_name} ${contact.last_name}`;
+            const firstLetter = fullName.charAt(0).toUpperCase();
+            const bgColor = getRandomColor(fullName.charCodeAt(0));
+            
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 ${bgColor} flex items-center justify-center text-white text-lg font-bold avatar-circle">
+                            ${firstLetter}
+                        </div>
+                        <div class="ml-4">
+                            <h3 class="text-lg font-semibold text-gray-900">${fullName}</h3>
+                            <p class="text-sm text-gray-500">${contact.category || 'No category'}</p>
+                        </div>
+                    </div>
+                    <button class="star-btn text-gray-400 hover:text-yellow-500 p-1 transition-colors duration-200" data-first="${contact.first_name}" data-last="${contact.last_name}">
+                        <i class="fas ${contact.is_starred ? 'fa-star text-yellow-400' : 'fa-star-o'} text-lg"></i>
+                    </button>
+                </div>
+                <div class="space-y-2 mb-4">
+                    ${contact.phone_number ? `<p class="text-sm flex items-center"><i class="fas fa-phone w-5 text-gray-400"></i> ${contact.phone_number}</p>` : ''}
+                    ${contact.email ? `<p class="text-sm flex items-center"><i class="fas fa-envelope w-5 text-gray-400"></i> ${contact.email}</p>` : ''}
+                    ${contact.address ? `<p class="text-sm flex items-center"><i class="fas fa-map-marker w-5 text-gray-400"></i> ${contact.address}</p>` : ''}
+                    ${contact.institution ? `<p class="text-sm flex items-center"><i class="fas fa-building w-5 text-gray-400"></i> ${contact.institution}</p>` : ''}
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button class="edit-btn text-gray-600 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-all duration-300 transform hover:scale-110" 
+                            data-first="${contact.first_name}" data-last="${contact.last_name}">
+                        <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="delete-btn text-gray-600 hover:text-red-600 p-2 rounded-full hover:bg-red-50 transition-all duration-300 transform hover:scale-110" 
+                            data-first="${contact.first_name}" data-last="${contact.last_name}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            
+            // Add event listeners
+            card.querySelector('.star-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleStar(contact.first_name, contact.last_name);
+            });
+            
+            card.querySelector('.edit-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openEditContactModal(contact.first_name, contact.last_name);
+            });
+            
+            card.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openDeleteModal(contact.first_name, contact.last_name);
+            });
+            
+            return card;
+        }
+        
+        function createContactRow(contact) {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-gray-50 transition-colors duration-200';
+            
+            const fullName = `${contact.first_name} ${contact.last_name}`;
+            const firstLetter = fullName.charAt(0).toUpperCase();
+            const bgColor = getRandomColor(fullName.charCodeAt(0));
+            
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 ${bgColor} flex items-center justify-center text-white text-sm font-bold mr-3 avatar-circle">
+                            ${firstLetter}
+                        </div>
+                        <div class="font-medium text-gray-900">${fullName}</div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-500">${contact.category || 'No category'}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-900">${contact.phone_number}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-900">${contact.email}</span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <button class="star-btn text-gray-400 hover:text-yellow-500 mr-3 transition-all duration-200 transform hover:scale-110" 
+                            data-first="${contact.first_name}" data-last="${contact.last_name}">
+                        <i class="fas ${contact.is_starred ? 'fa-star text-yellow-400' : 'fa-star-o'}"></i>
+                    </button>
+                    <button class="edit-btn text-blue-600 hover:text-blue-900 mr-3 transition-all duration-300 transform hover:scale-110" 
+                            data-first="${contact.first_name}" data-last="${contact.last_name}">
+                        Edit
+                    </button>
+                    <button class="delete-btn text-red-600 hover:text-red-900 transition-all duration-300 transform hover:scale-110" 
+                            data-first="${contact.first_name}" data-last="${contact.last_name}">
+                        Delete
+                    </button>
+                </td>
+            `;
+            
+            // Add event listeners
+            row.querySelector('.star-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleStar(contact.first_name, contact.last_name);
+            });
+            
+            row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openEditContactModal(contact.first_name, contact.last_name);
+            });
+            
+            row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                openDeleteModal(contact.first_name, contact.last_name);
+            });
+            
+            return row;
+        }
+        
+        function renderGroups() {
+            groupsList.innerHTML = '';
+            groups.forEach(group => {
+                const li = document.createElement('li');
+                const count = contacts.filter(c => c.category === group).length;
+                li.innerHTML = `
+                    <a href="#" class="group-item flex items-center justify-between px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors duration-200" data-group="${group}">
+                        <div class="flex items-center">
+                            <i class="fas fa-folder w-6 text-center text-gray-500"></i>
+                            <span class="ml-3">${group}</span>
+                        </div>
+                        <span class="bg-gray-200 text-gray-700 text-xs font-medium px-2 py-0.5 rounded-full">${count}</span>
+                    </a>
+                `;
+                li.querySelector('.group-item').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    filterByGroup(group);
+                });
+                groupsList.appendChild(li);
+            });
+        }
+        
+        function renderGroupsContent() {
+            contactsView.classList.add('hidden');
+            groupsView.classList.remove('hidden');
+            
+            groupsContent.innerHTML = '';
+            groups.forEach(group => {
+                const groupContacts = contacts.filter(c => c.category === group);
+                const card = createGroupCard(group, groupContacts);
+                groupsContent.appendChild(card);
+            });
+        }
+        
+        function createGroupCard(group, groupContacts) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-sm overflow-hidden contact-card-hover transition-all duration-200 animate-scale-in';
+            
+            card.innerHTML = `
+                <div class="p-5 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">${group}</h3>
+                        <span class="bg-gray-200 text-gray-700 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                            ${groupContacts.length} contacts
+                        </span>
+                    </div>
+                </div>
+                <div class="p-5 max-h-60 overflow-y-auto scrollbar-hide">
+                    <div class="space-y-3">
+                        ${groupContacts.map(contact => {
+                            const fullName = `${contact.first_name} ${contact.last_name}`;
+                            return `
+                                <div class="flex items-center p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
+                                    <div class="w-8 h-8 ${getRandomColor(fullName.charCodeAt(0))} flex items-center justify-center text-white text-sm font-bold mr-3 avatar-circle">
+                                        ${fullName.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="font-medium text-gray-900">${fullName}</div>
+                                        <div class="text-sm text-gray-500">${contact.phone_number}</div>
+                                    </div>
+                                    <button class="edit-btn text-gray-400 hover:text-blue-600 p-2 transition-colors duration-200" 
+                                            data-first="${contact.first_name}" data-last="${contact.last_name}">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                <div class="p-3 border-t border-gray-200 bg-gray-50">
+                    <button class="view-group-btn w-full py-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200" 
+                            data-group="${group}">
+                        View all ${groupContacts.length} contacts
+                    </button>
+                </div>
+            `;
+            
+            // Add event listeners
+            card.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const firstName = btn.getAttribute('data-first');
+                    const lastName = btn.getAttribute('data-last');
+                    openEditContactModal(firstName, lastName);
+                });
+            });
+            
+            card.querySelector('.view-group-btn').addEventListener('click', () => {
+                filterByGroup(group);
+            });
+            
+            return card;
+        }
+        
+        function filterByGroup(group) {
+            currentView = 'contacts';
+            updateMenuActive();
+            
+            const filteredContacts = contacts.filter(contact => contact.category === group);
+            renderContacts(filteredContacts);
+        }
+        
+        function openAddContactModal() {
+            modalTitle.textContent = 'Add New Contact';
+            contactForm.reset();
+            document.getElementById('contact-id').value = '';
+            currentContactId = null;
+            contactModal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('first-name').focus(), 100);
+        }
+        
+        function openEditContactModal(firstName, lastName) {
+            const contact = contacts.find(c => c.first_name === firstName && c.last_name === lastName);
+            if (!contact) return;
+            
+            currentContactId = { firstName, lastName };
+            modalTitle.textContent = 'Edit Contact';
+            
+            // Fill form fields
+            document.getElementById('first-name').value = contact.first_name;
+            document.getElementById('last-name').value = contact.last_name;
+            document.getElementById('contact-category').value = contact.category || '';
+            document.getElementById('contact-institution').value = contact.institution || '';
+            document.getElementById('contact-phone').value = contact.phone_number;
+            document.getElementById('contact-email').value = contact.email || '';
+            document.getElementById('contact-address').value = contact.address || '';
+            document.getElementById('contact-starred').checked = contact.is_starred;
+            
+            contactModal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('first-name').focus(), 100);
+        }
+        
+        function closeContactModal() {
+            contactModal.classList.add('hidden');
+        }
+        
+        function openDeleteModal(firstName, lastName) {
+            currentContactId = { firstName, lastName };
+            deleteModal.classList.remove('hidden');
+        }
+        
+        function closeDeleteModal() {
+            deleteModal.classList.add('hidden');
+        }
+        
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const contactData = {
+                first_name: document.getElementById('first-name').value,
+                last_name: document.getElementById('last-name').value,
+                category: document.getElementById('contact-category').value || '',
+                institution: document.getElementById('contact-institution').value || '',
+                phone_number: document.getElementById('contact-phone').value,
+                email: document.getElementById('contact-email').value || '',
+                address: document.getElementById('contact-address').value || '',
+                is_starred: document.getElementById('contact-starred').checked
+            };
+            
+            try {
+                if (currentContactId) {
+                    // Update existing contact
+                    await updateContactAPI(
+                        currentContactId.firstName, 
+                        currentContactId.lastName, 
+                        contactData
+                    );
+                    showToast('Contact updated successfully');
+                } else {
+                    // Create new contact
+                    await createContactAPI(contactData);
+                    showToast('Contact added successfully');
+                }
+                
+                // Reload contacts
+                await loadContactsFromAPI();
+                closeContactModal();
+            } catch (error) {
+                showToast('Failed to save contact');
+            }
+        }
+        
+        async function deleteContact() {
+            if (!currentContactId) return;
+            
+            try {
+                await deleteContactAPI(currentContactId.firstName, currentContactId.lastName);
+                showToast('Contact deleted successfully');
+                
+                // Reload contacts
+                await loadContactsFromAPI();
+                closeDeleteModal();
+            } catch (error) {
+                showToast('Failed to delete contact');
+            }
+        }
+        
+        async function toggleStar(firstName, lastName) {
+            try {
+                await toggleStarAPI(firstName, lastName);
+                
+                // Update local data
+                const contact = contacts.find(c => c.first_name === firstName && c.last_name === lastName);
+                if (contact) {
+                    contact.is_starred = !contact.is_starred;
+                }
+                
+                // Re-render
+                if (currentView === 'contacts') {
+                    renderContacts();
+                } else if (currentView === 'starred') {
+                    renderStarredContacts();
+                }
+                // 更新菜单中的星标图标颜色
+                if (contact && contact.is_starred) {
+                    menuStarred.querySelector('i').classList.remove('text-gray-400');
+                    menuStarred.querySelector('i').classList.add('text-yellow-400');
+                } else if (contact) {
+                    const starredCount = contacts.filter(c => c.is_starred).length;
+                    if (starredCount === 0) {
+                        menuStarred.querySelector('i').classList.remove('text-yellow-400');
+                        menuStarred.querySelector('i').classList.add('text-gray-400');
+                    }
+                }
+            } catch (error) {
+                showToast('Failed to toggle star');
+            }
+        }
+        
+        async function handleSearch() {
+            const searchTerm = searchInput.value.trim();
+            if (searchTerm === '') {
+                await loadContactsFromAPI();
+                return;
+            }
+            
+            try {
+                const filtered = await searchContactsAPI(searchTerm);
+                renderContacts(filtered);
+            } catch (error) {
+                console.error('Error searching:', error);
+            }
+        }
+        
+        function toggleViewMode() {
+            viewMode = viewMode === 'grid' ? 'list' : 'grid';
+            renderContacts();
+        }
+        
+        function sortContacts(list) {
+            const sorted = [...list];
+            switch (sortBy) {
+                case 'name':
+                    return sorted.sort((a, b) => 
+                        `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`)
+                    );
+                case 'category':
+                    return sorted.sort((a, b) => {
+                        const catA = a.category || '';
+                        const catB = b.category || '';
+                        return catA.localeCompare(catB);
+                    });
+                case 'starred':
+                    return sorted.sort((a, b) => {
+                        if (a.is_starred && !b.is_starred) return -1;
+                        if (!a.is_starred && b.is_starred) return 1;
+                        return `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`);
+                    });
+                default:
+                    return sorted;
+            }
+        }
+        
+        function getRandomColor(charCode) {
+            const colors = [
+                'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 
+                'bg-red-500', 'bg-purple-500', 'bg-pink-500', 
+                'bg-indigo-500', 'bg-teal-500', 'bg-orange-500'
+            ];
+            return colors[charCode % colors.length];
+        }
+        
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                    toast.classList.remove('translate-y-10', 'opacity-0');
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
