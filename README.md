@@ -5,7 +5,7 @@ A modern, web-based contact management application built with Python Flask backe
 ## Features
 
 - **Contact Management**: Add, edit, delete, and view contacts
-- **Search Functionality**: Real-time search across all contact fields
+- **Search Functionality**: Real-time search across all contact fields (name, phone, email, address)
 - **Sorting Options**: Sort by name or category with ascending/descending order
 - **Starred Contacts**: Mark important contacts with star indicators
 - **Export to Excel**: Export contact list to Excel format
@@ -162,4 +162,4 @@ This project is for educational purposes as part of a software engineering assig
 
 ## Author
 
-Created by Jiayao Hu and Hantao Wu 
+Created by Jiayao Hu and Hantao Wu
