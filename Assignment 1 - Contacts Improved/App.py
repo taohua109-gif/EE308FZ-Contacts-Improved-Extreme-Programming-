@@ -179,7 +179,7 @@ def toggle_star(first_name, last_name):
     else:
         return jsonify({'error': f'Contact {first_name} {last_name} not found'}), 404
 
-@app.route('/contacts/<first_name>/<last_name>', methods=['PUT'])
+
 
 # Export contacts to Excel
 @app.route('/contacts/export', methods=['GET'])
