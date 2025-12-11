@@ -111,7 +111,7 @@ border-color: #9ca3af;
         
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
-to { opacity: 1; transform: translateY(0); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         /* 添加缩放动画 */
@@ -184,7 +184,8 @@ from { opacity: 0; transform: scale(0.95); }
                     </div>
                     <input type="text" id="search-input" placeholder="Search contacts..." class="form-input pl-10 w-full">
                 </div>
-<!-- 在header部分添加导入按钮 -->
+                
+                <!-- 在header部分添加导入按钮 -->
                 <div class="flex items-center space-x-3">
                     <button id="view-toggle" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 transition-colors">
                         <i class="fa fa-th-large"></i>
@@ -348,7 +349,8 @@ from { opacity: 0; transform: scale(0.95); }
                             <option value="Other">Other</option>
                         </select>
                     </div>
-<div class="space-y-3">
+                    
+                    <div class="space-y-3">
                         <label for="contact-institution" class="block text-sm font-medium text-gray-700 font-semibold">Institution</label>
                         <input type="text" id="contact-institution" name="institution" class="form-input-enhanced" placeholder="Enter institution">
                     </div>
@@ -409,8 +411,8 @@ from { opacity: 0; transform: scale(0.95); }
     <input type="file" id="excel-file-input" accept=".xlsx,.xls" class="hidden">
     
     <script>
-        // templates/index.html
-        const API_BASE_URL = 'http://112.74.54.0:8888';
+        // API Base URL
+        const API_BASE_URL = '';
         
         // State variables
         let contacts = [];
@@ -480,7 +482,7 @@ from { opacity: 0; transform: scale(0.95); }
             .then(data => {
                 hideLoading();
                 
-                if (data.success || data.imported !== undefined) {
+                if (data.success) {
                     // 显示导入结果
                     const message = `成功导入 ${data.imported} 个联系人`;
                     const details = data.duplicates > 0 ? `，跳过 ${data.duplicates} 个重复联系人` : '';
@@ -642,41 +644,9 @@ from { opacity: 0; transform: scale(0.95); }
             }
         }
         
-        async function deleteContactAPI(firstName, lastName) {
-            try {
-                // 如果last name为空，使用"None"作为占位符
-                const encodedLastName = lastName === "" ? "None" : encodeURIComponent(lastName);
-                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodedLastName}`, {
-                    method: 'DELETE'
-                });
-                if (!response.ok) throw new Error('Failed to delete contact');
-                return await response.json();
-            } catch (error) {
-                console.error('Error deleting contact:', error);
-                throw error;
-            }
-        }
-        
-        async function toggleStarAPI(firstName, lastName) {
-            try {
-                // 如果last name为空，使用"None"作为占位符
-                const encodedLastName = lastName === "" ? "None" : encodeURIComponent(lastName);
-                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodedLastName}/star`, {
-                    method: 'PUT'
-                });
-                if (!response.ok) throw new Error('Failed to toggle star');
-                return await response.json();
-            } catch (error) {
-                console.error('Error toggling star:', error);
-                throw error;
-            }
-        }
-        
         async function updateContactAPI(firstName, lastName, contactData) {
             try {
-                // 如果last name为空，使用"None"作为占位符
-                const encodedLastName = lastName === "" ? "None" : encodeURIComponent(lastName);
-                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodedLastName}`, {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -687,6 +657,33 @@ from { opacity: 0; transform: scale(0.95); }
                 return await response.json();
             } catch (error) {
                 console.error('Error updating contact:', error);
+                throw error;
+            }
+        }
+        
+        async function deleteContactAPI(firstName, lastName) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to delete contact');
+                return await response.json();
+            } catch (error) {
+                console.error('Error deleting contact:', error);
+                throw error;
+            }
+        }
+        
+        <!-- 在toggleStarAPI函数之后添加导出功能函数 -->
+        async function toggleStarAPI(firstName, lastName) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/contacts/${encodeURIComponent(firstName)}/${encodeURIComponent(lastName)}/star`, {
+                    method: 'PUT'
+                });
+                if (!response.ok) throw new Error('Failed to toggle star');
+                return await response.json();
+            } catch (error) {
+                console.error('Error toggling star:', error);
                 throw error;
             }
         }
@@ -710,6 +707,7 @@ from { opacity: 0; transform: scale(0.95); }
             contactsGrid.classList.add('hidden');
             contactsList.classList.add('hidden');
         }
+        
         function hideLoading() {
             document.getElementById('loading-skeleton').classList.add('hidden');
         }
@@ -949,6 +947,7 @@ from { opacity: 0; transform: scale(0.95); }
         function renderGroupsContent() {
             contactsView.classList.add('hidden');
             groupsView.classList.remove('hidden');
+            
             groupsContent.innerHTML = '';
             groups.forEach(group => {
                 const groupContacts = contacts.filter(c => c.category === group);
