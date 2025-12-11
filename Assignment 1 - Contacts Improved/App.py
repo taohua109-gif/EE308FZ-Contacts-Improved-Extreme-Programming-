@@ -58,7 +58,6 @@ class Contacts:
         }
 
 # Define a class AddressBook to store contacts information,
-# 在AddressBook类中添加批量导入方法
 class AddressBook:
     # Initialize the AddressBook with database connection
     def __init__(self):
@@ -115,12 +114,6 @@ class AddressBook:
         else:
             print(f"Contact {first_name} {last_name} not found.")
             return False
-    
-    # 批量添加联系人
-    def bulk_add_contacts(self, contacts_data):
-        added_count, duplicates = self.db.bulk_add_contacts(contacts_data)
-        print(f"Bulk import: {added_count} contacts added, {len(duplicates)} duplicates found.")
-        return added_count, duplicates
 
 # Create a global AddressBook instance
 address_book = AddressBook()
@@ -143,10 +136,6 @@ def add_contact():
 
 @app.route('/contacts/<first_name>/<last_name>', methods=['PUT'])
 def update_contact(first_name, last_name):
-    # 处理last name为空的情况，使用"None"作为占位符
-    if last_name == "None":
-        last_name = ""
-    
     data = request.json
     contact = Contacts(data['first_name'], data['last_name'], data.get('category', ''),
                       data.get('phone_number', ''), data.get('email', ''), data.get('address', ''),
@@ -158,10 +147,6 @@ def update_contact(first_name, last_name):
 
 @app.route('/contacts/<first_name>/<last_name>', methods=['DELETE'])
 def delete_contact(first_name, last_name):
-    # 处理last name为空的情况，使用"None"作为占位符
-    if last_name == "None":
-        last_name = ""
-    
     if address_book.delete_contact(first_name, last_name):
         return jsonify({'message': f'Contact {first_name} {last_name} deleted successfully'})
     else:
@@ -170,16 +155,10 @@ def delete_contact(first_name, last_name):
 # Toggle contact starred status
 @app.route('/contacts/<first_name>/<last_name>/star', methods=['PUT'])
 def toggle_star(first_name, last_name):
-    # 处理last name为空的情况，使用"None"作为占位符
-    if last_name == "None":
-        last_name = ""
-    
     if address_book.toggle_starred(first_name, last_name):
         return jsonify({'message': f'Contact {first_name} {last_name} starred status toggled successfully'})
     else:
         return jsonify({'error': f'Contact {first_name} {last_name} not found'}), 404
-
-
 
 # Export contacts to Excel
 @app.route('/contacts/export', methods=['GET'])
@@ -227,106 +206,11 @@ def export_contacts():
     
     return response
 
-# 在导出联系人路由之后添加导入联系人路由
-@app.route('/contacts/import', methods=['POST'])
-def import_contacts():
-    try:
-        # 检查是否有文件上传
-        if 'file' not in request.files:
-            return jsonify({'error': 'No file provided'}), 400
-        
-        file = request.files['file']
-        
-        # 检查文件名
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
-            
-        # 检查文件类型
-        if not file.filename.endswith(('.xlsx', '.xls')):
-            return jsonify({'error': 'Invalid file type. Please upload an Excel file (.xlsx or .xls)'}), 400
-        
-        # 读取Excel文件
-        df = pd.read_excel(file)
-        
-        # 解析Excel数据
-        imported_contacts = []
-        duplicate_contacts = []
-        invalid_contacts = []
-        
-        for index, row in df.iterrows():
-            try:
-                # 解析Excel行数据
-                starred = row.get('Starred', '')
-                name = row.get('Name', '')
-                category = row.get('Category', '')
-                institution = row.get('Institution', '')
-                phone = row.get('Phone Number', '')
-                email = row.get('Email', '')
-                address = row.get('Address', '')
-                
-                # 处理姓名拆分
-                if not name or pd.isna(name):
-                    invalid_contacts.append(f"Row {index+1}: Missing name")
-                    continue
-                    
-                name_parts = str(name).strip().split(' ', 1)
-                first_name = name_parts[0].strip()
-                last_name = name_parts[1].strip() if len(name_parts) > 1 else ""
-                
-                # 处理星标状态
-                is_starred = str(starred).strip() == '★'
-                
-                # 创建联系人对象
-                contact = Contacts(
-                    first_name=first_name,
-                    last_name=last_name,
-                    category=str(category).strip() if not pd.isna(category) else "",
-                    phone_number=str(phone).strip() if not pd.isna(phone) else "",
-                    email=str(email).strip() if not pd.isna(email) else "",
-                    address=str(address).strip() if not pd.isna(address) else "",
-                    institution=str(institution).strip() if not pd.isna(institution) else "",
-                    is_starred=is_starred
-                )
-                
-                # 尝试添加联系人
-                if address_book.add_contact(contact):
-                    imported_contacts.append(f"{first_name} {last_name}")
-                else:
-                    duplicate_contacts.append(f"{first_name} {last_name}")
-                    
-            except Exception as e:
-                invalid_contacts.append(f"Row {index+1}: {str(e)}")
-                continue
-        
-        # 返回导入结果
-        return jsonify({
-            'success': True,
-            'message': f'Import completed successfully',
-            'imported': len(imported_contacts),
-            'duplicates': len(duplicate_contacts),
-            'invalid': len(invalid_contacts),
-            'imported_contacts': imported_contacts,
-            'duplicate_contacts': duplicate_contacts,
-            'invalid_contacts': invalid_contacts
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': f'Failed to import contacts: {str(e)}'}), 500
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Search contacts
-@app.route('/contacts/search', methods=['GET'])
-def search_contacts():
-    search_term = request.args.get('q', '')
-    if search_term:
-        contacts = address_book.db.search_contacts(search_term)
-    else:
-        contacts = address_book.load_contacts()
-    return jsonify(contacts)
-
 # Main function to run the Flask app
+# App.py 最后几行
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=False)
