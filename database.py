@@ -144,9 +144,26 @@ class Database:
     def delete_contact(self, first_name, last_name):
         conn = sqlite3.connect(self.db_file)
         cursor = conn.cursor()
+        
+        # 添加调试信息
+        print(f"Attempting to delete contact: '{first_name}' '{last_name}'")
+        
+        # 先检查联系人是否存在
+        cursor.execute('SELECT first_name, last_name FROM contacts WHERE first_name=? AND last_name=?', (first_name, last_name))
+        existing = cursor.fetchone()
+        
+        if not existing:
+            print(f"Contact not found: '{first_name}' '{last_name}'")
+            conn.close()
+            return False
+        
+        # 执行删除操作
         cursor.execute('DELETE FROM contacts WHERE first_name=? AND last_name=?', (first_name, last_name))
         conn.commit()
         affected = cursor.rowcount > 0
+        
+        print(f"Delete operation affected {cursor.rowcount} rows")
+        
         conn.close()
         return affected
         
@@ -170,3 +187,58 @@ class Database:
         conn.commit()
         conn.close()
         return True
+
+    def bulk_add_contacts(self, contacts_data):
+        """
+        批量添加联系人以提高性能
+        """
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+        
+        added_count = 0
+        duplicate_contacts = []
+        
+        try:
+            for contact_data in contacts_data:
+                try:
+                    cursor.execute("""
+                        INSERT INTO contacts (first_name, last_name, category, phone_number, email, address, institution, is_starred)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                    """, (contact_data['first_name'], contact_data['last_name'],
+                          contact_data.get('category', ''), contact_data['phone_number'],
+                          contact_data['email'], contact_data['address'],
+                          contact_data.get('institution', ''), contact_data.get('is_starred', 0)))
+                    added_count += 1
+                except sqlite3.IntegrityError:
+                    # 联系人已存在
+                    duplicate_contacts.append(f"{contact_data['first_name']} {contact_data['last_name']}")
+                    continue
+                    
+            conn.commit()
+            return added_count, duplicate_contacts
+        finally:
+            conn.close()
+
+    def search_contacts(self, search_term):
+        """
+        搜索联系人，在所有字段中查找匹配的关键词
+        """
+        conn = sqlite3.connect(self.db_file)
+        cursor = conn.cursor()
+        
+        # 构建SQL查询，在所有文本字段中搜索
+        query = """
+            SELECT first_name, last_name, category, phone_number, email, address, institution, is_starred 
+            FROM contacts 
+            WHERE first_name LIKE ? OR last_name LIKE ? OR category LIKE ? OR phone_number LIKE ? OR email LIKE ? OR address LIKE ? OR institution LIKE ?
+            ORDER BY is_starred DESC
+        """
+        
+        # 使用%进行模糊匹配
+        search_pattern = f'%{search_term}%'
+        cursor.execute(query, (search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern))
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [{"first_name": row[0], "last_name": row[1], "category": row[2], "phone_number": row[3], "email": row[4],
+                 "address": row[5], "institution": row[6], "is_starred": bool(row[7])} for row in rows]
